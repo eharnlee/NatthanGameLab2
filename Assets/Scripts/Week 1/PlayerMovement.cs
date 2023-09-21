@@ -22,6 +22,9 @@ public class PlayerMovement : MonoBehaviour
     public GameObject restartButton;
     private Vector3 restartButtonOriginalPosition;
 
+    // for animation
+    public Animator marioAnimator;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,6 +40,9 @@ public class PlayerMovement : MonoBehaviour
         startPosition = transform.localPosition;
         scoreTextOriginalPosition = ScoreText.transform.localPosition;
         restartButtonOriginalPosition = restartButton.transform.localPosition;
+
+        // update animator state
+        marioAnimator.SetBool("onGround", onGroundState);
     }
 
     // Update is called once per frame
@@ -47,20 +53,27 @@ public class PlayerMovement : MonoBehaviour
         {
             faceRightState = false;
             marioSprite.flipX = true;
+            if (marioBody.velocity.x > 0.1f)
+                marioAnimator.SetTrigger("onSkid");
         }
 
         if (Input.GetKeyDown("d") && !faceRightState)
         {
             faceRightState = true;
             marioSprite.flipX = false;
+            if (marioBody.velocity.x < -0.1f)
+                marioAnimator.SetTrigger("onSkid");
         }
+
+        marioAnimator.SetFloat("xSpeed", Mathf.Abs(marioBody.velocity.x));
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.CompareTag("Enemy"))
         {
-            Debug.Log("Collided with goomba!");
+            // Debug.Log("Collided with goomba!");
+
             Time.timeScale = 0.0f;
 
             // show GameOverPanel
@@ -73,7 +86,12 @@ public class PlayerMovement : MonoBehaviour
     }
     void OnCollisionEnter2D(Collision2D col)
     {
-        if (col.gameObject.CompareTag("Ground")) onGroundState = true;
+        if (col.gameObject.CompareTag("Ground") && !onGroundState)
+        {
+            onGroundState = true;
+            // update animator state
+            marioAnimator.SetBool("onGround", onGroundState);
+        }
     }
 
     // FixedUpdate may be called once per frame. See documentation for details.
@@ -100,12 +118,15 @@ public class PlayerMovement : MonoBehaviour
         {
             marioBody.AddForce(Vector2.up * upSpeed, ForceMode2D.Impulse);
             onGroundState = false;
+            // update animator state
+            marioAnimator.SetBool("onGround", onGroundState);
         }
     }
 
     public void RestartButtonCallback(int input)
     {
-        Debug.Log("Restart!");
+        // Debug.Log("Restart!");
+
         // reset everything
         ResetGame();
         // resume time
