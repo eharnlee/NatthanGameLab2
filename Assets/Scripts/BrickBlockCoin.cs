@@ -7,7 +7,6 @@ public class BrickBlockCoin : MonoBehaviour
     public Animator blockAnimator;
     public Animator coinAnimator;
     public GameObject brickBlock;
-    public GameObject coin;
 
 
     // Start is called before the first frame update
@@ -26,6 +25,8 @@ public class BrickBlockCoin : MonoBehaviour
     {
 
     }
+
+
 
     void OnCollisionEnter2D(Collision2D col)
     {
